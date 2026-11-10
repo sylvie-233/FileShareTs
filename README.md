@@ -95,6 +95,8 @@ git tag -a v1.2.0 -m "v1.2.0"
 git push origin v1.2.0
 ```
 
+也可以在 GitHub 的 **Actions → Release → Run workflow** 中手动填写标签触发。
+
 工作流见 [.github/workflows/release.yml](.github/workflows/release.yml)，产物包含 `FileShare.exe`、`SHA256SUMS.txt` 与 `.env.example`。
 
 ## 文档
