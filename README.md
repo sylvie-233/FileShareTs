@@ -86,6 +86,17 @@ UPLOAD_DIR=uploads
 MAX_FILE_SIZE=104857600
 ```
 
+## 发布 Release
+
+推送 `v*` 标签会触发 GitHub Actions 在 Windows 上测试、打包并创建 Release：
+
+```bash
+git tag -a v1.2.0 -m "v1.2.0"
+git push origin v1.2.0
+```
+
+工作流见 [.github/workflows/release.yml](.github/workflows/release.yml)，产物包含 `FileShare.exe`、`SHA256SUMS.txt` 与 `.env.example`。
+
 ## 文档
 
 - [manage.ps1](manage.ps1)：运维脚本，`pwsh ./manage.ps1 -Help` 查看完整参数

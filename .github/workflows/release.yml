@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build exe and publish release
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: fileshare-monorepo
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+          cache-dependency-path: fileshare-monorepo/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm exe
+
+      - name: Generate checksum
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash "apps/cmd/dist/FileShare.exe" -Algorithm SHA256).Hash.ToLower()
+          "$hash  FileShare.exe" | Set-Content "apps/cmd/dist/SHA256SUMS.txt" -Encoding ascii
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: FileShareTs ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            fileshare-monorepo/apps/cmd/dist/FileShare.exe
+            fileshare-monorepo/apps/cmd/dist/SHA256SUMS.txt
+            fileshare-monorepo/apps/cmd/.env.example
