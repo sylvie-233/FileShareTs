@@ -1,0 +1,9 @@
+node_modules
+dist
+.turbo
+coverage
+uploads
+logs
+build
+pnpm-lock.yaml
+apps/cmd/static/

@@ -1,0 +1,44 @@
+{
+  "name": "@fileshare/cmd",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "description": "FileShare 局域网文件共享服务",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsdown",
+    "start": "node dist/main.cjs",
+    "exe": "tsdown --config tsdown.exe.config.ts",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rimraf dist .turbo build"
+  },
+  "dependencies": {
+    "@fileshare/types": "workspace:*",
+    "@fileshare/utils": "workspace:*",
+    "@hono/node-server": "^1.13.7",
+    "@hono/zod-openapi": "^1.6.3",
+    "@scalar/hono-api-reference": "^0.12.18",
+    "busboy": "^1.6.0",
+    "dotenv": "^18.0.9",
+    "hono": "^4.6.16",
+    "pino": "^10.4.0",
+    "pino-pretty": "^13.2.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@fileshare/eslint-config": "workspace:*",
+    "@fileshare/tsconfig": "workspace:*",
+    "@tsdown/exe": "0.23.7",
+    "@types/busboy": "^1.5.4",
+    "@types/node": "^22.10.5",
+    "eslint": "^9.18.0",
+    "rimraf": "^6.0.1",
+    "tsdown": "^0.23.7",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

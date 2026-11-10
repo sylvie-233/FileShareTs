@@ -1,0 +1,28 @@
+node_modules/
+dist/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# 运行时数据
+uploads/
+logs/
+
+# 本地环境变量
+.env
+.env.local
+.env.*.local
+
+# 打包产物
+build/
+*.exe
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+.DS_Store
+Thumbs.db

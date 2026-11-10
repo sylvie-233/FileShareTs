@@ -1,0 +1,27 @@
+{
+  "name": "fileshare-monorepo",
+  "version": "1.2.0",
+  "private": true,
+  "description": "FileShare · 局域网文件共享服务（Hono + TypeScript）",
+  "license": "MIT",
+  "packageManager": "pnpm@10.32.1",
+  "engines": {
+    "node": ">=22.12.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "exe": "turbo run build --filter=@fileshare/cmd... && pnpm --filter @fileshare/cmd exe",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "clean": "turbo run clean",
+    "format": "prettier --write \"**/*.{js,mjs,cjs,ts,json,md,yaml,yml,css,html}\"",
+    "format:check": "prettier --check \"**/*.{js,mjs,cjs,ts,json,md,yaml,yml,css,html}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "turbo": "^2.5.0"
+  }
+}

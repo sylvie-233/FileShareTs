@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>局域网文件共享</title>
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    <script src="/static/qrcode.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .share-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .share-section h3 {
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+
+        .share-link-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8f9ff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 12px 15px;
+        }
+
+        .share-link {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            color: #333;
+            word-break: break-all;
+            background: transparent;
+            border: none;
+            outline: none;
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-copy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-copy:active {
+            transform: translateY(0);
+        }
+
+        .drop-zone {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .drop-zone:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .drop-zone.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+
+        .drop-zone-icon {
+            font-size: 64px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone-text {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .drop-zone-hint {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .files-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .files-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .files-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .btn-clear {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-clear:hover {
+            background: #ee5a5a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-clear:active {
+            transform: translateY(0);
+        }
+
+        .files-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            background: #f0f2ff;
+            transform: translateX(5px);
+        }
+
+        .file-icon {
+            font-size: 36px;
+            margin-right: 15px;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+
+        .file-meta {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .btn-download {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #5568d3;
+        }
+
+        .btn-delete {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #ee5a5a;
+        }
+
+        /* 二维码相关样式 */
+        .qrcode-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .qrcode-popup {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            margin-bottom: 10px;
+            display: none;
+            pointer-events: none;
+        }
+
+        .qrcode-popup::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px;
+            border-style: solid;
+            border-color: white transparent transparent transparent;
+        }
+
+        .qrcode-container:hover .qrcode-popup {
+            display: block;
+        }
+
+        .qrcode-img {
+            width: 120px;
+            height: 120px;
+        }
+
+        .btn-share {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-share:hover {
+            background: #45a049;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            display: none;
+        }
+
+        .notification.success {
+            background: #4CAF50;
+        }
+
+        .notification.error {
+            background: #f44336;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
+
+            .upload-section,
+            .files-section {
+                padding: 20px 15px;
+                border-radius: 12px;
+            }
+
+            .share-section {
+                padding: 20px 15px;
+                border-radius: 12px;
+            }
+
+            .share-section h3 {
+                font-size: 1.1em;
+                margin-bottom: 12px;
+            }
+
+            .share-link-container {
+                flex-direction: column;
+                gap: 12px;
+                padding: 15px;
+            }
+
+            .share-link {
+                font-size: 0.9em;
+                text-align: left;
+                padding: 10px;
+                background: white;
+                border-radius: 6px;
+            }
+
+            .btn-copy {
+                width: 100%;
+                padding: 14px;
+                font-size: 1em;
+            }
+
+            .drop-zone {
+                padding: 40px 15px;
+            }
+
+            .drop-zone-icon {
+                font-size: 48px;
+                margin-bottom: 15px;
+            }
+
+            .drop-zone-text {
+                font-size: 1em;
+            }
+
+            .drop-zone-hint {
+                font-size: 0.85em;
+            }
+
+            .files-section h2 {
+                font-size: 1.4em;
+                margin-bottom: 15px;
+            }
+
+            .files-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .btn-clear {
+                width: 100%;
+                padding: 12px;
+                font-size: 0.95em;
+            }
+
+            .files-list {
+                gap: 12px;
+            }
+
+            .file-item {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px;
+                gap: 12px;
+            }
+
+            .file-item:hover {
+                transform: none;
+            }
+
+            .file-icon {
+                font-size: 32px;
+                margin-right: 0;
+                margin-bottom: 5px;
+            }
+
+            .file-info {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
+            .file-name {
+                font-size: 0.95em;
+                line-height: 1.4;
+            }
+
+            .file-meta {
+                font-size: 0.8em;
+            }
+
+            .file-actions {
+                width: 100%;
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                flex: 1;
+                min-width: calc(50% - 5px);
+                padding: 12px 16px;
+                font-size: 0.95em;
+            }
+
+            .empty-state {
+                padding: 40px 20px;
+            }
+
+            .empty-state-icon {
+                font-size: 48px;
+            }
+
+            .notification {
+                left: 10px;
+                right: 10px;
+                top: 10px;
+                padding: 12px 20px;
+                font-size: 0.9em;
+            }
+
+            @keyframes slideIn {
+                from {
+                    transform: translateY(-100px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .upload-section,
+            .files-section,
+            .share-section {
+                padding: 15px 12px;
+            }
+
+            .share-section h3 {
+                font-size: 1em;
+            }
+
+            .share-link-container {
+                padding: 12px;
+            }
+
+            .share-link {
+                font-size: 0.85em;
+                padding: 8px;
+            }
+
+            .btn-copy {
+                padding: 12px;
+                font-size: 0.95em;
+            }
+
+            .drop-zone {
+                padding: 30px 12px;
+            }
+
+            .drop-zone-icon {
+                font-size: 40px;
+            }
+
+            .file-item {
+                padding: 12px;
+            }
+
+            .file-icon {
+                font-size: 28px;
+            }
+
+            .file-name {
+                font-size: 0.9em;
+            }
+
+            .btn {
+                padding: 10px 14px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📁 局域网文件共享</h1>
+        
+        <div class="share-section">
+            <h3>🔗 分享链接</h3>
+            <div class="share-link-container">
+                <input type="text" class="share-link" id="shareLink" readonly>
+                <div class="qrcode-container">
+                    <button class="btn-copy" onclick="copyShareLink()">复制链接</button>
+                    <div class="qrcode-popup">
+                        <canvas class="qrcode-img" id="shareQrcode"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="upload-section">
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-zone-icon">📤</div>
+                <div class="drop-zone-text">拖拽文件到这里上传</div>
+                <div class="drop-zone-hint">或者点击选择文件</div>
+                <input type="file" class="file-input" id="fileInput" multiple>
+            </div>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">上传中...</div>
+            </div>
+        </div>
+        
+        <div class="files-section">
+            <div class="files-header">
+                <h2>📂 已上传文件</h2>
+                <button class="btn-clear" onclick="clearAllFiles()">🗑️ 清空全部</button>
+            </div>
+            <div class="files-list" id="filesList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <p>暂无文件，请上传文件</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const filesList = document.getElementById('filesList');
+        const notification = document.getElementById('notification');
+        const shareLink = document.getElementById('shareLink');
+
+        shareLink.value = window.location.href;
+        
+        // 获取服务器实际URL
+        async function getServerUrl() {
+            try {
+                const response = await fetch('/api/v1/server-info');
+                const data = await response.json();
+                return data.server_url;
+            } catch (error) {
+                console.error('获取服务器URL失败:', error);
+                return window.location.origin;
+            }
+        }
+        
+        // 更新分享链接为服务器实际URL
+        getServerUrl().then(serverUrl => {
+            shareLink.value = serverUrl;
+        });
+        
+        // 生成分享链接的二维码
+        async function generateShareQrcode() {
+            const qrcodeElement = document.getElementById('shareQrcode');
+            if (qrcodeElement) {
+                const serverUrl = await getServerUrl();
+                QRCode.toCanvas(qrcodeElement, serverUrl, {
+                    width: 120,
+                    margin: 1
+                });
+            }
+        }
+
+        // 生成文件分享二维码
+        async function generateFileQrcodes() {
+            const serverUrl = await getServerUrl();
+            const fileQrcodes = document.querySelectorAll('.qrcode-img[data-file]');
+            fileQrcodes.forEach(canvas => {
+                const filename = canvas.getAttribute('data-file');
+                const fileUrl = `${serverUrl}/api/v1/download/${encodeURIComponent(filename)}`;
+                QRCode.toCanvas(canvas, fileUrl, {
+                    width: 120,
+                    margin: 1
+                });
+            });
+        }
+
+        // 复制文件链接
+        async function copyFileLink(filename) {
+            const serverUrl = await getServerUrl();
+            const fileUrl = `${serverUrl}/api/v1/download/${encodeURIComponent(filename)}`;
+            
+            // 尝试使用现代API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(fileUrl);
+                    showNotification('文件链接已复制到剪贴板！', 'success');
+                    return;
+                } catch (err) {
+                    console.log('现代API失败，尝试备用方法');
+                }
+            }
+            
+            // 备用方法：使用textarea
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = fileUrl;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                textArea.style.top = '0';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (successful) {
+                    showNotification('文件链接已复制到剪贴板！', 'success');
+                } else {
+                    showNotification('复制失败，请手动复制', 'error');
+                }
+            } catch (err) {
+                console.error('复制失败:', err);
+                showNotification('复制失败，请手动复制', 'error');
+            }
+        }
+
+        // 初始生成二维码
+        generateShareQrcode();
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                uploadFiles(files);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (fileInput.files.length > 0) {
+                uploadFiles(fileInput.files);
+            }
+        });
+
+        async function uploadFiles(files) {
+            for (const file of files) {
+                await uploadFile(file);
+            }
+            loadFiles();
+            
+            // 清空fileInput的value，确保下次选择相同文件时也能触发change事件
+            fileInput.value = '';
+        }
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            progressContainer.style.display = 'block';
+            progressFill.style.width = '0%';
+            progressText.textContent = `正在上传: ${file.name}`;
+
+            try {
+                const response = await fetch('/api/v1/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    progressFill.style.width = '100%';
+                    progressText.textContent = '上传成功！';
+                    showNotification('文件上传成功！', 'success');
+                } else {
+                    throw new Error('上传失败');
+                }
+            } catch (error) {
+                showNotification('文件上传失败！', 'error');
+                progressText.textContent = '上传失败';
+            }
+
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+            }, 2000);
+        }
+
+        async function loadFiles() {
+            try {
+                const response = await fetch('/api/v1/files');
+                const data = await response.json();
+                displayFiles(data.files);
+            } catch (error) {
+                console.error('加载文件列表失败:', error);
+            }
+        }
+
+        function displayFiles(files) {
+            if (files.length === 0) {
+                filesList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>暂无文件，请上传文件</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filesList.innerHTML = files.map(file => `
+                <div class="file-item">
+                    <div class="file-icon">${getFileIcon(file.name)}</div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-meta">${formatFileSize(file.size)} · ${formatDate(file.modified)}</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-download" onclick="downloadFile('${file.name}')">下载</button>
+                        <div class="qrcode-container">
+                            <button class="btn btn-share" onclick="copyFileLink('${file.name}')">分享</button>
+                            <div class="qrcode-popup">
+                                <canvas class="qrcode-img" data-file="${file.name}"></canvas>
+                            </div>
+                        </div>
+                        <button class="btn btn-delete" onclick="deleteFile('${file.name}')">删除</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // 生成文件二维码
+            setTimeout(generateFileQrcodes, 100);
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                'pdf': '📄',
+                'doc': '📝', 'docx': '📝',
+                'xls': '📊', 'xlsx': '📊',
+                'ppt': '📽️', 'pptx': '📽️',
+                'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️',
+                'mp3': '🎵', 'wav': '🎵',
+                'mp4': '🎬', 'avi': '🎬', 'mkv': '🎬',
+                'zip': '📦', 'rar': '📦', '7z': '📦',
+                'txt': '📃',
+                'py': '🐍', 'js': '📜', 'html': '🌐', 'css': '🎨'
+            };
+            return icons[ext] || '📁';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function formatDate(timestamp) {
+            const date = new Date(timestamp * 1000);
+            const now = new Date();
+            const diff = now - date;
+            
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            if (seconds < 60) {
+                return '刚刚';
+            } else if (minutes < 60) {
+                return `${minutes}分钟前`;
+            } else if (hours < 24) {
+                return `${hours}小时前`;
+            } else if (days < 7) {
+                return `${days}天前`;
+            } else {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hour = String(date.getHours()).padStart(2, '0');
+                const minute = String(date.getMinutes()).padStart(2, '0');
+                return `${year}-${month}-${day} ${hour}:${minute}`;
+            }
+        }
+
+        function downloadFile(filename) {
+            window.location.href = `/api/v1/download/${filename}`;
+        }
+
+        async function deleteFile(filename) {
+            if (!confirm(`确定要删除 "${filename}" 吗？`)) return;
+
+            try {
+                const response = await fetch(`/api/v1/files/${filename}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showNotification('文件删除成功！', 'success');
+                    loadFiles();
+                } else {
+                    throw new Error('删除失败');
+                }
+            } catch (error) {
+                showNotification('文件删除失败！', 'error');
+            }
+        }
+
+        async function clearAllFiles() {
+            const filesList = document.getElementById('filesList');
+            const hasFiles = !filesList.querySelector('.empty-state');
+            
+            if (!hasFiles) {
+                showNotification('没有文件可以清空', 'error');
+                return;
+            }
+
+            if (!confirm('确定要清空所有文件吗？此操作不可恢复！')) return;
+
+            try {
+                const response = await fetch('/api/v1/files', {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showNotification(`已清空 ${data.count} 个文件！`, 'success');
+                    loadFiles();
+                } else {
+                    throw new Error('清空失败');
+                }
+            } catch (error) {
+                showNotification('清空文件失败！', 'error');
+            }
+        }
+
+        async function copyShareLink() {
+            const serverUrl = await getServerUrl();
+            shareLink.value = serverUrl;
+            
+            // 尝试使用现代API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(serverUrl);
+                    showNotification('链接已复制到剪贴板！', 'success');
+                    return;
+                } catch (err) {
+                    console.log('现代API失败，尝试备用方法');
+                }
+            }
+            
+            // 备用方法：使用textarea
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = serverUrl;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                textArea.style.top = '0';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (successful) {
+                    showNotification('链接已复制到剪贴板！', 'success');
+                } else {
+                    showNotification('复制失败，请手动复制', 'error');
+                }
+            } catch (err) {
+                console.error('复制失败:', err);
+                showNotification('复制失败，请手动复制', 'error');
+            }
+        }
+
+        function showNotification(message, type) {
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        loadFiles();
+    </script>
+</body>
+</html>
