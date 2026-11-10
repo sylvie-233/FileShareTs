@@ -25,8 +25,12 @@ async function bootstrap(): Promise<void> {
       hostname: env.HOST,
     },
     (info) => {
-      logger.info(`服务已启动：http://${info.address}:${info.port}`);
+      const host = env.HOST === '0.0.0.0' || env.HOST === '::' ? 'localhost' : env.HOST;
+      const baseUrl = `http://${host}:${info.port}`;
+
+      logger.info(`服务已启动：${baseUrl}`);
       logger.info(`局域网访问：http://<本机IP>:${info.port}`);
+      logger.info(`API 文档：${baseUrl}/api/docs`);
       logger.info(`上传目录：${resolveFromBase(env.UPLOAD_DIR)}`);
     },
   );
