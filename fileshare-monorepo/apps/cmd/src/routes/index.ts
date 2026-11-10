@@ -21,7 +21,9 @@ export function createApiRoutes() {
         '业务接口前缀为 `/api/v1`；错误响应统一为 `{ "detail": "错误信息" }`。',
       ].join('\n'),
     },
-    servers: [{ url: env.API_V1_PREFIX, description: '当前服务' }],
+    // 子路由以 .route('/v1') 挂载，doc 中的 path 已包含 /v1，
+    // 因此 server 只需要到 /api，避免拼接出 /api/v1/v1/...
+    servers: [{ url: '/api', description: '当前服务' }],
     tags: [
       { name: '服务', description: '服务器信息与局域网访问地址' },
       { name: '文件', description: '文件上传、列表、下载与删除' },

@@ -91,8 +91,8 @@ MAX_FILE_SIZE=104857600
 推送 `v*` 标签会触发 GitHub Actions 在 Windows 上测试、打包并创建 Release：
 
 ```bash
-git tag -a v1.2.0 -m "v1.2.0"
-git push origin v1.2.0
+git tag -a v1.2.1 -m "v1.2.1"
+git push origin v1.2.1
 ```
 
 也可以在 GitHub 的 **Actions → Release → Run workflow** 中手动填写标签触发。

@@ -1,6 +1,6 @@
 {
   "name": "@fileshare/cmd",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "type": "module",
   "description": "FileShare 局域网文件共享服务",

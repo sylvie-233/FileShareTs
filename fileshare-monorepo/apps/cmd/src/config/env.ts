@@ -27,7 +27,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 
   PROJECT_NAME: z.string().default('FileShare'),
-  VERSION: z.string().default('1.2.0'),
+  VERSION: z.string().default('1.2.1'),
   API_V1_PREFIX: z
     .string()
     .regex(/^\/[^\s]*$/, 'API_V1_PREFIX 必须以 / 开头')
